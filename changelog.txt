@@ -1,0 +1,64 @@
+v1.5.3 31 aug 2018
+improved multi performance
+increased scanning interval from 100ms to 50ms
+messed up code a bit
+
+v1.5.2 16 apr 2017
+improved performance
+fixed 64 bit bug when closing ugaris client
+cleaned up code a bit
+
+v1.5.1 15 apr 2017
+added support for ugaris
+keys:  a3res 4625240
+      ugaris 2241092
+
+v1.5.0 22 jan 2017
+rewrote core
+added cata support
+added 'Area' to info label
+      you can now leave area without messing up the map
+      click reset to rebind the area to the selected alt
+added 'Yendor' to info label
+
+v1.4.1 invicta 64 bit version. deprecated
+      	
+v1.4.0 14 may 2016
+added multi setting
+extra functionality to info label 
+      shows Lobby # when In lobby region 
+            Enter # when in rd
+            Error # alt idled or key might be wrong
+fixed changing key wouldn't take effect until program restart
+
+v1.3 25 mar 2016
+added icons
+fixed always on top setting
+
+v1.2 09 mar 2016
+added clicking reset will rebind to selected alt
+added always on top setting
+fixed enter label would show wrong rd when client idled
+fixed closing when minimised bug
+
+v1.1 25 jan 2016
+fixed changing key wouldn't take effect until program restart
+improved performance
+
+v1.0 22 jan 2016
+added settings key to update RDT when game updates
+      current key is 4616336
+added remember window position on exit
+fixed artefacts when entering lobby
+bumped version out of alpha
+
+v0.2a 21 jan 2016
+fixed artefacts when clicking reset
+fixed display clearing when pressing alt or tab or moving the program off screen
+improved performance
+
+v0.1a 20 jan 2016
+fixed more than 1 'someone' in dropdown when you had idled clients
+
+v0.0a 20 jan 2016
+initial alpha release
