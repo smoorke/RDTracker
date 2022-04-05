@@ -2,6 +2,7 @@
 RDTracker for Astonia
 
 To make values show in questlog of your client add the following to your client code
+
 start of `do_display_random`  `questlog.c`
 ```c
     static unsigned int Base = 0;
@@ -9,7 +10,8 @@ start of `do_display_random`  `questlog.c`
     {
         Base = (unsigned int)GetModuleHandle(NULL);
     }
-```end of `do_display_random`
+```
+end of `do_display_random`
 ```c
     y = dd_drawtext_break(10, y, 204, graycolor, 0, "Only shrines in dungeons you have already solved (used the continuity shrine), but not yet used, are shown. The continuity shrine shown is the first one you haven't used yet.");
     y += 12;
@@ -24,4 +26,5 @@ start of `do_display_random`  `questlog.c`
                     MAPDY);
     y += 12;
     return y;
-}```
+}
+```
