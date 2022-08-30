@@ -1,5 +1,5 @@
 # RDTracker
-RDTracker for Astonia
+[RDTracker](https://github.com/smoorke/RDTracker/releases/download/RDTracker/RDTracker.exe) for Astonia3
 
 To make values show in questlog of your client add the following to your client code
 
