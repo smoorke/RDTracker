@@ -5,10 +5,24 @@ To make values show in questlog of your client add the following to your client 
 
 start of `do_display_random`  `questlog.c`
 ```c
-    static unsigned int Base = 0;
+    static unsigned int Base, Key, Isprite, OffX, OffY;
+    static int Flags, Fsprite;
+    static char Swap;
     if (!Base)
     {
         Base = (unsigned int)GetModuleHandle(NULL);
+        if ((unsigned int)&originx < (unsigned int)&originy){
+            Key = (unsigned int)&originx - Base;
+            Swap = 0;
+        }else{
+            Key = (unsigned int)&originy - Base;
+            Swap = 1;
+        }
+        Isprite = (unsigned int)&map[MAXMN/2] - Base + (unsigned int)&map->isprite - (unsigned int)&map;
+        Flags = (unsigned int)&map->flags - (unsigned int)&map->isprite;
+        Fsprite = (unsigned int)&map->fsprite - (unsigned int)&map->isprite;
+        OffX = sizeof(map[0]);
+        OffY = MAPDY;
     }
 ```
 end of `do_display_random`
@@ -17,13 +31,9 @@ end of `do_display_random`
     y += 12;
     dd_drawtext(10, y, graycolor, 0, "RDTracker:");
     y += 12;
-    dd_drawtext_fmt(16, y, graycolor, 0, "Key %d iSprite %d", (unsigned int)&originx - Base, (unsigned int)&map[MAXMN/2] - Base + (unsigned int)&map->isprite - (unsigned int)&map);
+    dd_drawtext_fmt(15, y, graycolor, 0, "Key %d iSprite %d%s", Key, Isprite, Swap?" SwapXY":"");
     y += 12;
-    dd_drawtext_fmt(16, y, graycolor, 0, "flags %d fSprite %d offXY %d %d",
-                    (unsigned int)&map->flags - (unsigned int)&map->isprite,
-                    (unsigned int)&map->fsprite - (unsigned int)&map->isprite,
-                    sizeof(map[0]),
-                    MAPDY);
+    dd_drawtext_fmt(15, y, graycolor, 0, "flags %d fSprite %d offXY %d %d", Flags, Fsprite, OffX, OffY);
     y += 12;
     return y;
 }
