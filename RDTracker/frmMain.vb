@@ -142,6 +142,11 @@ Public Class frmMain
         Me.Text = If(My.Settings.Cata, "CATA", "RD") & " Tracker"
 
     End Sub
+    Private Sub frmMain_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+        If Not Screen.AllScreens.Any(Function(s) s.WorkingArea.Contains(Me.Location)) Then
+            Me.Location = Screen.PrimaryScreen.WorkingArea.Location
+        End If
+    End Sub
     Private Sub cboAlt_DropDown(sender As Object, e As EventArgs) Handles cboAlt.DropDown
         Dim lstAst As New List(Of String)
         Dim Name As String = ""
