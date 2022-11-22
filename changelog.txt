@@ -1,3 +1,10 @@
+v2.3.4
+fixed RDTracker opening off screen when monitor layout changes
+
+v1.5.4 20 jun 2020
+improved multi preformance
+added auto-elevation when astonia is running as admin
+
 v1.5.3 31 aug 2018
 improved multi performance
 increased scanning interval from 100ms to 50ms
