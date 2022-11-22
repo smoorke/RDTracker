@@ -29,6 +29,7 @@ Partial Class frmMain
         Me.lblEnter = New System.Windows.Forms.Label()
         Me.tmrTick = New System.Windows.Forms.Timer(Me.components)
         Me.btnSettings = New System.Windows.Forms.Button()
+        Me.tmrActive = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
         '
         'btnReset
@@ -76,6 +77,10 @@ Partial Class frmMain
         Me.btnSettings.TabIndex = 3
         Me.btnSettings.UseVisualStyleBackColor = False
         '
+        'tmrActive
+        '
+        Me.tmrActive.Enabled = True
+        '
         'frmMain
         '
         Me.AllowDrop = True
@@ -108,4 +113,5 @@ Partial Class frmMain
     Friend WithEvents lblEnter As Label
     Friend WithEvents tmrTick As Timer
     Friend WithEvents btnSettings As Button
+    Friend WithEvents tmrActive As Timer
 End Class

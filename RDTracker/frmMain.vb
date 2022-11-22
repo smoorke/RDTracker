@@ -107,6 +107,12 @@ Public Class frmMain
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+        If My.Settings.SingleInstance AndAlso IPC.AlreadyOpen Then
+            IPC.RequestActivation = True
+            End
+        End If
+        IPC.AlreadyOpen = True
+
         Me.Location = My.Settings.Location
         Me.TopMost = My.Settings.Topmost
 
@@ -519,6 +525,27 @@ Public Class frmMain
         Next
         Return list
     End Function
+
+    Private Async Sub tmrActive_Tick(sender As Object, e As EventArgs) Handles tmrActive.Tick
+        If IPC.RequestActivation Then
+            IPC.RequestActivation = 0
+            Debug.Print("IPC.requestActivation")
+
+            If Me.WindowState = FormWindowState.Minimized Then
+                Const WM_SYSCOMMAND = &H112
+                Const SC_RESTORE = &HF120
+                WndProc(Message.Create(Me.Handle, WM_SYSCOMMAND, SC_RESTORE, IntPtr.Zero))
+            End If
+
+            Me.TopMost = True
+            Me.BringToFront()
+            Await Task.Delay(100)
+            Me.TopMost = My.Settings.Topmost
+
+            'Me.Activate()
+
+        End If
+    End Sub
 
     'Private Sub SaveAsToolStripMenuItem_Click(sender As Object, e As EventArgs)
     '    If frmSettings.Visible = True Then frmSettings.btnOK.PerformClick()

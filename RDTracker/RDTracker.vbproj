@@ -131,6 +131,7 @@
       <DependentUpon>frmMain.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="IPC.vb" />
     <Compile Include="Maze.vb" />
     <Compile Include="MemoryManager.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

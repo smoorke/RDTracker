@@ -39,6 +39,8 @@
         lblText.BackColor = My.Settings.background
         lblWarning.BackColor = My.Settings.background
 
+        chkSingleInstance.Checked = My.Settings.SingleInstance
+
     End Sub
 
     Private Sub makeSampleMaze(settingsobject As My.MySettings)
@@ -229,6 +231,8 @@
 
         My.Settings.exe = txtExe.Text
         My.Settings.className = txtClass.Text
+
+        My.Settings.SingleInstance = chkSingleInstance.Checked
 
         My.Settings.Save()
         Me.Close()

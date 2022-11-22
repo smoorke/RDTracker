@@ -56,6 +56,7 @@ Partial Class frmNewSettings
         Me.btnOK = New System.Windows.Forms.Button()
         Me.clDialog = New System.Windows.Forms.ColorDialog()
         Me.ttpInfo = New System.Windows.Forms.ToolTip(Me.components)
+        Me.chkSingleInstance = New System.Windows.Forms.CheckBox()
         Label3 = New System.Windows.Forms.Label()
         Label1 = New System.Windows.Forms.Label()
         Label2 = New System.Windows.Forms.Label()
@@ -71,7 +72,7 @@ Partial Class frmNewSettings
         'Label3
         '
         Label3.AutoSize = True
-        Label3.Location = New System.Drawing.Point(128, 35)
+        Label3.Location = New System.Drawing.Point(128, 32)
         Label3.Name = "Label3"
         Label3.Size = New System.Drawing.Size(27, 13)
         Label3.TabIndex = 25
@@ -127,6 +128,7 @@ Partial Class frmNewSettings
         '
         'tpBasic
         '
+        Me.tpBasic.Controls.Add(Me.chkSingleInstance)
         Me.tpBasic.Controls.Add(Label3)
         Me.tpBasic.Controls.Add(Me.txtClass)
         Me.tpBasic.Controls.Add(Me.txtExe)
@@ -147,7 +149,7 @@ Partial Class frmNewSettings
         'txtClass
         '
         Me.txtClass.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.txtClass.Location = New System.Drawing.Point(8, 58)
+        Me.txtClass.Location = New System.Drawing.Point(8, 52)
         Me.txtClass.Name = "txtClass"
         Me.txtClass.Size = New System.Drawing.Size(149, 20)
         Me.txtClass.TabIndex = 24
@@ -157,7 +159,7 @@ Partial Class frmNewSettings
         'txtExe
         '
         Me.txtExe.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.txtExe.Location = New System.Drawing.Point(8, 32)
+        Me.txtExe.Location = New System.Drawing.Point(8, 29)
         Me.txtExe.Name = "txtExe"
         Me.txtExe.Size = New System.Drawing.Size(119, 20)
         Me.txtExe.TabIndex = 23
@@ -167,7 +169,7 @@ Partial Class frmNewSettings
         'chkSwapXY
         '
         Me.chkSwapXY.AutoSize = True
-        Me.chkSwapXY.Location = New System.Drawing.Point(8, 85)
+        Me.chkSwapXY.Location = New System.Drawing.Point(8, 75)
         Me.chkSwapXY.Name = "chkSwapXY"
         Me.chkSwapXY.Size = New System.Drawing.Size(67, 17)
         Me.chkSwapXY.TabIndex = 20
@@ -178,7 +180,7 @@ Partial Class frmNewSettings
         'chkCata
         '
         Me.chkCata.AutoSize = True
-        Me.chkCata.Location = New System.Drawing.Point(79, 84)
+        Me.chkCata.Location = New System.Drawing.Point(79, 75)
         Me.chkCata.Name = "chkCata"
         Me.chkCata.Size = New System.Drawing.Size(48, 17)
         Me.chkCata.TabIndex = 19
@@ -200,7 +202,7 @@ Partial Class frmNewSettings
         'chkMulti
         '
         Me.chkMulti.AutoSize = True
-        Me.chkMulti.Location = New System.Drawing.Point(8, 108)
+        Me.chkMulti.Location = New System.Drawing.Point(8, 92)
         Me.chkMulti.Name = "chkMulti"
         Me.chkMulti.Size = New System.Drawing.Size(48, 17)
         Me.chkMulti.TabIndex = 18
@@ -211,7 +213,7 @@ Partial Class frmNewSettings
         'chkTopmost
         '
         Me.chkTopmost.AutoSize = True
-        Me.chkTopmost.Location = New System.Drawing.Point(61, 108)
+        Me.chkTopmost.Location = New System.Drawing.Point(61, 92)
         Me.chkTopmost.Name = "chkTopmost"
         Me.chkTopmost.Size = New System.Drawing.Size(96, 17)
         Me.chkTopmost.TabIndex = 17
@@ -394,6 +396,25 @@ Partial Class frmNewSettings
         Me.btnOK.Text = "Ok"
         Me.btnOK.UseVisualStyleBackColor = True
         '
+        'ttpInfo
+        '
+        Me.ttpInfo.AutoPopDelay = 10000
+        Me.ttpInfo.InitialDelay = 500
+        Me.ttpInfo.ReshowDelay = 100
+        '
+        'chkSingleInstance
+        '
+        Me.chkSingleInstance.AutoSize = True
+        Me.chkSingleInstance.Location = New System.Drawing.Point(8, 109)
+        Me.chkSingleInstance.Name = "chkSingleInstance"
+        Me.chkSingleInstance.Size = New System.Drawing.Size(99, 17)
+        Me.chkSingleInstance.TabIndex = 26
+        Me.chkSingleInstance.Text = "Single Instance"
+        Me.ttpInfo.SetToolTip(Me.chkSingleInstance, "Running RDTracker for a 2nd time or more will bring an" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "  already open RDTracker " &
+        "from the same profile to the front." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "To make additional profiles copy, rename an" &
+        "d/or move RDTracker.exe")
+        Me.chkSingleInstance.UseVisualStyleBackColor = True
+        '
         'frmNewSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -451,4 +472,5 @@ Partial Class frmNewSettings
     Friend WithEvents ttpInfo As ToolTip
     Friend WithEvents lblWarning As Label
     Friend WithEvents lblText As Label
+    Friend WithEvents chkSingleInstance As CheckBox
 End Class
