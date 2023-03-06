@@ -1,5 +1,7 @@
-v2.3.4
+v2.4.0
+added support for SDL client
 fixed RDTracker opening off screen when monitor layout changes
+implemented single instance setting
 
 v1.5.4 20 jun 2020
 improved multi preformance

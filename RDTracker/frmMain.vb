@@ -2,92 +2,9 @@
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Configuration
+Imports System.IO.MemoryMappedFiles
 
 Public Class frmMain
-
-
-    ' 2.3.2
-    ' reverted config file mumbo jumbo. it was more trouble than it's worth
-
-
-    ' 2.3.1
-    ' added v2 config option to do a sysBeep when first drawing a GT
-    ' updated the info label to change color when a GT is visible
-
-
-    ' 2.3.0
-    ' added config validation
-    ' added command line option for importing a config file
-    ' added drag and drop for importing config files/folders
-
-
-    ' 2.2.2
-    ' added rudimentary settings managment/imports
-    '
-
-    ' 2.2.1
-    ' added settings for non standard classname and exename
-    '
-
-    ' 2.1.0
-    ' added settings for flagsOffest and fSprite2Offset and defaulted all values to yendor
-    ' fixed walls sometimes being drawn wrong
-    ' removed some debug output
-
-    ' 2.0.3
-    ' fixed jobbless shrine not always showing
-    ' fixed cata mode walls
-
-    ' 2.0.1
-    ' added all shrines
-    ' added trapdoors
-    ' disabled some debug code
-
-    ' 2.0
-    ' added wall detection
-    ' added gastrap detection
-    ' added junk piles
-    ' added cont and some other shrines
-
-    ' 1.5.3
-    ' improved multi performance
-    ' increased scanning interval from 100ms to 50ms
-    ' messed up code a bit
-
-
-    ' 1.5.2
-    ' improved performance
-    ' fixed 64 bit bug when closing ugaris client
-    ' cleaned up code a bit
-
-
-    ' version 1.5.1
-    ' added support for ugaris
-
-
-    ' version 1.5.0
-    ' ported back from 64 bit
-    ' fixed label showing wrong rd number
-    ' added Catamode
-    ' added Area to info label
-    '       you can now leave area without messing up the map
-    ' added Yendor to info label
-
-
-    ' version 1.4.1 64bit invicta only
-    ' rewrote core
-    ' added functionality to handle invictica (64 bit shenannigans)
-    ' improved error detection
-
-
-    ' version 1.4.0
-    ' added multi setting
-    ' extra functionality to label 
-    '       shows Lobby # When In lobby region 
-    '             Enter # when in rd
-    '             Error # alt idled or key might be wrong
-    ' fixed changing key wouldn't take effect until program restart
-
 
     Private _memManager As New MemoryManager
 
@@ -183,6 +100,9 @@ Public Class frmMain
 
     End Sub
     Private strSock As String
+    Private _mmf As MemoryMappedFile
+    Private _mmva As MemoryMappedViewAccessor
+    Private isSDL As Boolean = False
     Private Sub cboAlt_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboAlt.SelectedIndexChanged
 
         tmrTick.Enabled = False
@@ -191,12 +111,30 @@ Public Class frmMain
             If _memManager.TryAttachToProcess(cboAlt.SelectedItem & " - ", My.Settings.exe.Split({"|"}, StringSplitOptions.RemoveEmptyEntries)) Then
                 strSock = Strings.Right(_memManager.targetProcess.MainWindowTitle, 8)
                 wasArea = False
+                _mmf = MemoryMappedFile.CreateOrOpen($"MOAC{_memManager.targetProcess.Id}", Marshal.SizeOf(GetType(MoacSharedMem)))
+                _mmva = _mmf.CreateViewAccessor()
+                _mmva.Read(0, shm)
+                If shm.pID = _memManager.targetProcess.Id Then
+                    isSDL = True
+                Else
+                    isSDL = False
+                End If
                 tmrTick.Enabled = True
             End If
 
         End If
 
     End Sub
+    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto, Pack:=0)>
+    Structure MoacSharedMem
+        Dim pID As UInt32
+        Dim hp, shield, [end], mana As Byte
+        Dim base As UInt64
+        Dim key, isprite, offX, offY As Integer
+        Dim flags, fsprite As Integer
+        Dim swapped As Byte
+    End Structure
+    Private shm As MoacSharedMem
     'Dim brushWhite As New SolidBrush(Color.White)
     'Dim brushRed As New SolidBrush(Color.Red)
     'Dim brushCyan As New SolidBrush(Color.Cyan)
@@ -208,15 +146,35 @@ Public Class frmMain
     Private Function readMemPoint(pp As Process)
         Dim gameX, gameY As Integer
         reader.TryAttachToProcess(pp)
-
-        Dim base As Integer = pp.MainModule.BaseAddress
-        If Not My.Settings.SwapXY Then
-            gameX = reader.ReadInt32(base + My.Settings.PlayerX)
-            gameY = reader.ReadInt32(base + My.Settings.PlayerX + 4)
-        Else
-            gameY = reader.ReadInt32(base + My.Settings.PlayerX) 'note: Ugaris has X and Y swapped in memory
-            gameX = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+        Dim mshm As MoacSharedMem
+        Dim mmf As MemoryMappedFile = MemoryMappedFile.CreateOrOpen($"MOAC{pp.Id}", Marshal.SizeOf(GetType(MoacSharedMem)))
+        Dim mmva As MemoryMappedViewAccessor = mmf.CreateViewAccessor()
+        mmva.Read(0, mshm)
+        Dim SDL As Boolean = False
+        If mshm.pID = pp.Id Then
+            SDL = True
         End If
+        If SDL Then
+            If mshm.swapped = 0 Then
+                gameX = reader.ReadIntWoW64(mshm.base + mshm.key)
+                gameY = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
+            Else
+                gameY = reader.ReadIntWoW64(mshm.base + mshm.key) 'note: Ugaris has X and Y swapped in memory
+                gameX = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
+            End If
+        Else
+            Dim base As Integer = pp.MainModule.BaseAddress
+            If Not My.Settings.SwapXY Then
+                gameX = reader.ReadInt32(base + My.Settings.PlayerX)
+                gameY = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+            Else
+                gameY = reader.ReadInt32(base + My.Settings.PlayerX) 'note: Ugaris has X and Y swapped in memory
+                gameX = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+            End If
+        End If
+
+        mmva.Dispose()
+        mmf.Dispose()
         reader.DetachFromProcess()
 
         Return New Point(gameX, gameY)
@@ -227,30 +185,42 @@ Public Class frmMain
     Dim loopCount As Integer = 0
     Dim base As Integer = 0
     Dim lstAproc As List(Of Process) = listProcesses()
+
     Private Sub tmrTick_Tick(sender As Object, e As EventArgs) Handles tmrTick.Tick
         base = 0
         If cboAlt.SelectedIndex = 0 Then
             tmrTick.Enabled = False
             Exit Sub
         End If
-
-        Try
-            base = _memManager.targetProcess.MainModule.BaseAddress
-        Catch ex As Exception
-            lblEnter.Text = "Error " & mainRdNum
-            prevP = ptZero
-            tmrTick.Enabled = False
-            Exit Sub
-        End Try
-
-        If Not My.Settings.SwapXY Then
-            gameX = _memManager.ReadInt32(base + My.Settings.PlayerX)
-            gameY = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
-        Else
-
-            gameY = _memManager.ReadInt32(base + My.Settings.PlayerX)
-            gameX = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
+        If Not isSDL Then
+            Try
+                base = _memManager.targetProcess.MainModule.BaseAddress
+            Catch ex As Exception
+                lblEnter.Text = "Error " & mainRdNum
+                prevP = ptZero
+                tmrTick.Enabled = False
+                Exit Sub
+            End Try
         End If
+        If isSDL Then
+            If shm.swapped = 0 Then
+                gameX = _memManager.ReadIntWoW64(shm.base + shm.key + 4)
+                gameY = _memManager.ReadIntWoW64(shm.base + shm.key)
+            Else
+                gameY = _memManager.ReadIntWoW64(shm.base + shm.key)
+                gameX = _memManager.ReadIntWoW64(shm.base + shm.key + 4)
+            End If
+        Else
+            If Not My.Settings.SwapXY Then
+                gameX = _memManager.ReadInt32(base + My.Settings.PlayerX)
+                gameY = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
+            Else
+                gameY = _memManager.ReadInt32(base + My.Settings.PlayerX)
+                gameX = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
+            End If
+        End If
+
+        'Debug.Print($"xy:{gameX}/{gameY}")
 
 
         If wasArea AndAlso Not Maze.isLobby(gameX, gameY) Then
@@ -305,16 +275,31 @@ Public Class frmMain
                 If Not isValidMapUnit(cY) Then
                     Continue For
                 End If
-
-                Dim offset As Integer = (My.Settings.OffsetXY.X * dX) + (My.Settings.OffsetXY.X * My.Settings.OffsetXY.Y * dY)
+                Dim offset As Integer
+                If isSDL Then
+                    offset = (shm.offX * dX) + (shm.offX * shm.offY * dY)
+                Else
+                    offset = (My.Settings.OffsetXY.X * dX) + (My.Settings.OffsetXY.X * My.Settings.OffsetXY.Y * dY)
+                End If
 
                 'Dim gsprite As Integer = _memManager.ReadInt32(My.Settings.iSprite - 16 + offset)
                 'Dim gsprite2 As Integer = _memManager.ReadInt32(My.Settings.iSprite - 12 + offset)
                 'Dim fsprite As Integer = _memManager.ReadInt32(My.Settings.iSprite - 8 + offset)
-
-                Dim isprite As Integer = _memManager.ReadInt32(base + My.Settings.iSprite + offset)
-                Dim flags As Integer = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.flagsOffset) ' 12
-                Dim fsprite2 As Integer = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.fSprite2Offset) '-4
+                Dim isprite As Integer
+                Dim flags As Integer
+                Dim fsprite2 As Integer
+                If isSDL Then
+                    isprite = _memManager.ReadIntWoW64(shm.base + shm.isprite + offset)
+                    flags = _memManager.ReadIntWoW64(shm.base + shm.isprite + offset + shm.flags)
+                    fsprite2 = _memManager.ReadIntWoW64(shm.base + shm.isprite + offset + shm.fsprite)
+                    If dX = 0 AndAlso dY = 0 Then
+                        Debug.Print($"isprite {isprite}")
+                    End If
+                Else
+                    isprite = _memManager.ReadInt32(base + My.Settings.iSprite + offset)
+                    flags = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.flagsOffset) ' 12
+                    fsprite2 = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.fSprite2Offset) '-4
+                End If
 
                 If (flags And &H10) = 0 Then Continue For 'not visible
 
@@ -420,6 +405,19 @@ Public Class frmMain
     End Sub
 
     Private Function sameSpot(prevP As Point)
+        If isSDL Then
+            If shm.swapped Then
+                If prevP.Y = _memManager.ReadIntWoW64(shm.base + shm.key) AndAlso prevP.X = _memManager.ReadIntWoW64(shm.base + shm.key + 4) Then
+                    Return True
+                End If
+            Else
+                If prevP.X = _memManager.ReadIntWoW64(shm.base + shm.key) AndAlso prevP.Y = _memManager.ReadInt32(shm.base + shm.key + 4) Then
+                    Return True
+                End If
+            End If
+            Return False
+        End If
+
         Dim base As Integer = _memManager.targetProcess.MainModule.BaseAddress
         If My.Settings.SwapXY Then
             If prevP.Y = _memManager.ReadInt32(base + My.Settings.PlayerX) AndAlso prevP.X = _memManager.ReadInt32(base + My.Settings.PlayerX + 4) Then

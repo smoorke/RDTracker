@@ -79,7 +79,14 @@ Public Class MemoryManager
 
 #Region "readmemory"
     Private Declare Function ReadProcessMemory Lib "kernel32" (ByVal hProcess As IntPtr, ByVal lpBaseAddress As IntPtr, ByVal lpBuffer() As Byte, ByVal iSize As Integer, ByRef lpNumberOfBytesRead As Integer) As Boolean
-
+    <DllImport("NTDll.dll", SetLastError:=True, CharSet:=CharSet.Unicode)>
+    Public Shared Function NtWow64ReadVirtualMemory64(
+                handle As IntPtr,
+                BaseAddress As UInt64,
+                Buffer As Byte(),
+                Size As UInt64,
+                ByRef NumberOfBytesRead As UInt64) As Integer
+    End Function
     Public Function ReadInt32(ByVal addr As IntPtr, Optional ByVal isOffset As Boolean = False) As Int32
         If isOffset Then
             addr = addr + targetProcess.MainModule.BaseAddress
@@ -98,6 +105,11 @@ Public Class MemoryManager
         Dim _rtnBytes(3) As Byte
         ReadProcessMemory(targetProcessHandle, addr, _rtnBytes, 4, vbNull)
 
+        Return BitConverter.ToInt32(_rtnBytes, 0)
+    End Function
+    Public Function ReadIntWoW64(ByVal addr As ULong) As Integer
+        Dim _rtnBytes(3) As Byte
+        NtWow64ReadVirtualMemory64(targetProcessHandle, addr, _rtnBytes, 4, vbNull)
         Return BitConverter.ToInt32(_rtnBytes, 0)
     End Function
     Public Function ReadInt64(ByVal addr As IntPtr) As Int64

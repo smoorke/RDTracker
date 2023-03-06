@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="changelog.txt" />
     <Content Include="RDTracker.ico" />
     <None Include="Resources\gear_wheel.png" />
   </ItemGroup>

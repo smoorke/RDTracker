@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="PlayerX" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">414352</Value>
+      <Value Profile="(Default)">406568</Value>
     </Setting>
     <Setting Name="Topmost" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -21,7 +21,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="iSprite" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">669168</Value>
+      <Value Profile="(Default)">661384</Value>
     </Setting>
     <Setting Name="OffsetXY" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">196, 51</Value>
@@ -36,7 +36,7 @@
       <Value Profile="(Default)">moac | new | Knights of Astonia | Astonia_remastered</Value>
     </Setting>
     <Setting Name="className" Type="System.String" Scope="User">
-      <Value Profile="(Default)">MAINWNDMOAC | 䅍义乗䵄䅏C | MAINWNDASTONIA</Value>
+      <Value Profile="(Default)">MAINWNDMOAC | 䅍义乗䵄䅏C | MAINWNDASTONIA | SDL_app</Value>
     </Setting>
     <Setting Name="background" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Black</Value>
@@ -75,7 +75,7 @@
       <Value Profile="(Default)">Red</Value>
     </Setting>
     <Setting Name="SingleInstance" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>
