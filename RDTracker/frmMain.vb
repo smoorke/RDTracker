@@ -143,39 +143,47 @@ Public Class frmMain
     Dim gameX, gameY As Integer
     Dim wasArea As Boolean = False
     Private reader As New MemoryManager
-    Private Function readMemPoint(pp As Process)
-        Dim gameX, gameY As Integer
-        reader.TryAttachToProcess(pp)
-        Dim mshm As MoacSharedMem
+    Private Function readMemPoint(pp As Process) As Point
+        If pp.HasExited Then Return New Point(0, 0)
         Dim mmf As MemoryMappedFile = MemoryMappedFile.CreateOrOpen($"MOAC{pp.Id}", Marshal.SizeOf(GetType(MoacSharedMem)))
         Dim mmva As MemoryMappedViewAccessor = mmf.CreateViewAccessor()
-        mmva.Read(0, mshm)
-        Dim SDL As Boolean = False
-        If mshm.pID = pp.Id Then
-            SDL = True
-        End If
-        If SDL Then
-            If mshm.swapped = 0 Then
-                gameX = reader.ReadIntWoW64(mshm.base + mshm.key)
-                gameY = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
-            Else
-                gameY = reader.ReadIntWoW64(mshm.base + mshm.key) 'note: Ugaris has X and Y swapped in memory
-                gameX = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
-            End If
-        Else
-            Dim base As Integer = pp.MainModule.BaseAddress
-            If Not My.Settings.SwapXY Then
-                gameX = reader.ReadInt32(base + My.Settings.PlayerX)
-                gameY = reader.ReadInt32(base + My.Settings.PlayerX + 4)
-            Else
-                gameY = reader.ReadInt32(base + My.Settings.PlayerX) 'note: Ugaris has X and Y swapped in memory
-                gameX = reader.ReadInt32(base + My.Settings.PlayerX + 4)
-            End If
-        End If
+        Dim gameX, gameY As Integer
+        Try
+            reader.TryAttachToProcess(pp)
+            Dim mshm As MoacSharedMem
 
-        mmva.Dispose()
-        mmf.Dispose()
-        reader.DetachFromProcess()
+            mmva.Read(0, mshm)
+            Dim SDL As Boolean = False
+            If mshm.pID = pp.Id Then
+                SDL = True
+            End If
+            If SDL Then
+                If mshm.swapped = 0 Then
+                    gameX = reader.ReadIntWoW64(mshm.base + mshm.key)
+                    gameY = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
+                Else
+                    gameY = reader.ReadIntWoW64(mshm.base + mshm.key) 'note: Ugaris has X and Y swapped in memory
+                    gameX = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
+                End If
+            Else
+
+                Dim base As Integer = pp.MainModule.BaseAddress
+                If Not My.Settings.SwapXY Then
+                    gameX = reader.ReadInt32(base + My.Settings.PlayerX)
+                    gameY = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+                Else
+                    gameY = reader.ReadInt32(base + My.Settings.PlayerX) 'note: Ugaris has X and Y swapped in memory
+                    gameX = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+                End If
+
+            End If
+        Catch
+            Return New Point(0, 0)
+        Finally
+            mmva.Dispose()
+            mmf.Dispose()
+            reader.DetachFromProcess()
+        End Try
 
         Return New Point(gameX, gameY)
 
