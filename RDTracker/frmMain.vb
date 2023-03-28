@@ -166,14 +166,12 @@ Public Class frmMain
                     gameX = reader.ReadIntWoW64(mshm.base + mshm.key + 4)
                 End If
             Else
-
-                Dim base As Integer = pp.MainModule.BaseAddress
                 If Not My.Settings.SwapXY Then
-                    gameX = reader.ReadInt32(base + My.Settings.PlayerX)
-                    gameY = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+                    gameX = reader.ReadInt32(My.Settings.PlayerX, True)
+                    gameY = reader.ReadInt32(My.Settings.PlayerX + 4, True)
                 Else
-                    gameY = reader.ReadInt32(base + My.Settings.PlayerX) 'note: Ugaris has X and Y swapped in memory
-                    gameX = reader.ReadInt32(base + My.Settings.PlayerX + 4)
+                    gameY = reader.ReadInt32(My.Settings.PlayerX, True) 'note: Ugaris has X and Y swapped in memory
+                    gameX = reader.ReadInt32(My.Settings.PlayerX + 4, True)
                 End If
 
             End If
@@ -191,24 +189,12 @@ Public Class frmMain
 
     Dim mainRdNum As Integer = 0
     Dim loopCount As Integer = 0
-    Dim base As Integer = 0
     Dim lstAproc As List(Of Process) = listProcesses()
 
     Private Sub tmrTick_Tick(sender As Object, e As EventArgs) Handles tmrTick.Tick
-        base = 0
         If cboAlt.SelectedIndex = 0 Then
             tmrTick.Enabled = False
             Exit Sub
-        End If
-        If Not isSDL Then
-            Try
-                base = _memManager.targetProcess.MainModule.BaseAddress
-            Catch ex As Exception
-                lblEnter.Text = "Error " & mainRdNum
-                prevP = ptZero
-                tmrTick.Enabled = False
-                Exit Sub
-            End Try
         End If
         If isSDL Then
             If shm.swapped = 0 Then
@@ -220,11 +206,11 @@ Public Class frmMain
             End If
         Else
             If Not My.Settings.SwapXY Then
-                gameX = _memManager.ReadInt32(base + My.Settings.PlayerX)
-                gameY = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
+                gameX = _memManager.ReadInt32(My.Settings.PlayerX, True)
+                gameY = _memManager.ReadInt32(My.Settings.PlayerX + 4, True)
             Else
-                gameY = _memManager.ReadInt32(base + My.Settings.PlayerX)
-                gameX = _memManager.ReadInt32(base + My.Settings.PlayerX + 4)
+                gameY = _memManager.ReadInt32(My.Settings.PlayerX, True)
+                gameX = _memManager.ReadInt32(My.Settings.PlayerX + 4, True)
             End If
         End If
 
@@ -304,9 +290,9 @@ Public Class frmMain
                         Debug.Print($"isprite {isprite}")
                     End If
                 Else
-                    isprite = _memManager.ReadInt32(base + My.Settings.iSprite + offset)
-                    flags = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.flagsOffset) ' 12
-                    fsprite2 = _memManager.ReadInt32(base + My.Settings.iSprite + offset + My.Settings.fSprite2Offset) '-4
+                    isprite = _memManager.ReadInt32(My.Settings.iSprite + offset, True)
+                    flags = _memManager.ReadInt32(My.Settings.iSprite + offset + My.Settings.flagsOffset, True) ' 12
+                    fsprite2 = _memManager.ReadInt32(My.Settings.iSprite + offset + My.Settings.fSprite2Offset, True) '-4
                 End If
 
                 If (flags And &H10) = 0 Then Continue For 'not visible
@@ -425,14 +411,12 @@ Public Class frmMain
             End If
             Return False
         End If
-
-        Dim base As Integer = _memManager.targetProcess.MainModule.BaseAddress
         If My.Settings.SwapXY Then
-            If prevP.Y = _memManager.ReadInt32(base + My.Settings.PlayerX) AndAlso prevP.X = _memManager.ReadInt32(base + My.Settings.PlayerX + 4) Then
+            If prevP.Y = _memManager.ReadInt32(My.Settings.PlayerX, True) AndAlso prevP.X = _memManager.ReadInt32(My.Settings.PlayerX + 4, True) Then
                 Return True
             End If
         Else
-            If prevP.X = _memManager.ReadInt32(base + My.Settings.PlayerX) AndAlso prevP.Y = _memManager.ReadInt32(base + My.Settings.PlayerX + 4) Then
+            If prevP.X = _memManager.ReadInt32(My.Settings.PlayerX, True) AndAlso prevP.Y = _memManager.ReadInt32(My.Settings.PlayerX + 4, True) Then
                 Return True
             End If
         End If

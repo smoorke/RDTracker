@@ -1,12 +1,27 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System.IO.MemoryMappedFiles
+Imports System.Runtime.InteropServices
 Public Class MemoryManager
     Private Declare Function OpenProcess Lib "kernel32.dll" (ByVal dwDesiredAcess As UInt32, ByVal bInheritHandle As Boolean, ByVal dwProcessId As Int32) As IntPtr
     Private Declare Function CloseHandle Lib "kernel32.dll" (ByVal hObject As IntPtr) As Boolean
     Public targetProcess As Process = Nothing
+    Public isSDL As Boolean = False
     Private targetProcessHandle As IntPtr = IntPtr.Zero 'Used for ReadProcessMemory
-    Private PROCESS_ALL_ACCESS As UInt32 = &H1F0FFF
-    Private PROCESS_VM_READ As UInt32 = &H10
+    Private Const PROCESS_ALL_ACCESS As UInt32 = &H1F0FFF
+    Private Const PROCESS_VM_READ As UInt32 = &H10
+    Private _mmf As MemoryMappedFile
+    Private _mmva As MemoryMappedViewAccessor
+    Public shm As MoacSharedMem
+    Private base As UInt32 = 0
 
+    <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto, Pack:=0)>
+    Structure MoacSharedMem
+        Dim pID As UInt32
+        Dim hp, shield, [end], mana As Byte
+        Dim base As UInt64
+        Dim key, isprite, offX, offY As Integer
+        Dim flags, fsprite As Integer
+        Dim swapped As Byte
+    End Structure
 #Region "attach by class"
     <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Private Shared Sub GetClassName(ByVal hWnd As System.IntPtr, ByVal lpClassName As System.Text.StringBuilder, ByVal nMaxCount As Integer)
@@ -25,7 +40,7 @@ Public Class MemoryManager
         Return False
     End Function
 #End Region
-    Public Function ListProcessesByNameArray(strings() As String) As List(Of Process)
+    Public Shared Function ListProcessesByNameArray(strings() As String) As List(Of Process)
         Dim list As List(Of Process) = New List(Of Process)
         For Each exe As String In strings
             list.AddRange(Process.GetProcessesByName(Trim(exe)))
@@ -44,6 +59,7 @@ Public Class MemoryManager
     End Function
 
     Public Function TryAttachToProcess(ByVal proc As Process) As Boolean
+        If proc Is Nothing Then Return False
         If targetProcessHandle = IntPtr.Zero Then 'not already attached
             targetProcess = proc
             'targetProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, False, targetProcess.Id)
@@ -55,6 +71,15 @@ Public Class MemoryManager
                 'MessageBox.Show("OpenProcess() FAIL!")
             Else
                 'if we get here, all connected and ready to use ReadProcessMemory()
+                _mmf = MemoryMappedFile.CreateOrOpen($"MOAC{Me.targetProcess.Id}", Marshal.SizeOf(GetType(MoacSharedMem)))
+                _mmva = _mmf.CreateViewAccessor()
+                _mmva.Read(0, shm)
+                If shm.pID = Me.targetProcess.Id Then
+                    isSDL = True
+                Else
+                    isSDL = False
+                    base = targetProcess.MainModule.BaseAddress
+                End If
                 TryAttachToProcess = True
                 'MessageBox.Show("OpenProcess() OK")
             End If
@@ -89,7 +114,7 @@ Public Class MemoryManager
     End Function
     Public Function ReadInt32(ByVal addr As IntPtr, Optional ByVal isOffset As Boolean = False) As Int32
         If isOffset Then
-            addr = addr + targetProcess.MainModule.BaseAddress
+            addr = addr + base
         End If
         Dim _dataBytes(3) As Byte
         ReadProcessMemory(targetProcessHandle, addr, _dataBytes, 4, vbNull)
@@ -101,12 +126,12 @@ Public Class MemoryManager
         ReadProcessMemory(targetProcessHandle, addr, _rtnBytes, 2, vbNull)
         Return BitConverter.ToInt16(_rtnBytes, 0)
     End Function
-    Public Function ReadInt32(ByVal addr As IntPtr) As Int32
-        Dim _rtnBytes(3) As Byte
-        ReadProcessMemory(targetProcessHandle, addr, _rtnBytes, 4, vbNull)
+    'Public Function ReadInt32(ByVal addr As IntPtr) As Int32
+    '    Dim _rtnBytes(3) As Byte
+    '    ReadProcessMemory(targetProcessHandle, addr, _rtnBytes, 4, vbNull)
 
-        Return BitConverter.ToInt32(_rtnBytes, 0)
-    End Function
+    '    Return BitConverter.ToInt32(_rtnBytes, 0)
+    'End Function
     Public Function ReadIntWoW64(ByVal addr As ULong) As Integer
         Dim _rtnBytes(3) As Byte
         NtWow64ReadVirtualMemory64(targetProcessHandle, addr, _rtnBytes, 4, vbNull)
@@ -221,3 +246,12 @@ Public Class MemoryManager
     End Function
 #End Region
 End Class
+<StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Auto, Pack:=0)>
+Structure MoacSharedMem
+    Dim pID As UInt32
+    Dim hp, shield, [end], mana As Byte
+    Dim base As UInt64
+    Dim key, isprite, offX, offY As Integer
+    Dim flags, fsprite As Integer
+    Dim swapped As Byte
+End Structure
