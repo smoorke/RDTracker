@@ -1,7 +1,9 @@
 # RDTracker
 [RDTracker](https://github.com/smoorke/RDTracker/releases/download/RDTracker/RDTracker.exe) for Astonia3
 
-To make values show in questlog of your client add the following to your client code
+SDL clients should always work out of the box.
+
+To make values show in questlog of your legacy client add the following to your client code.
 
 start of `do_display_random`  `questlog.c`
 ```c
