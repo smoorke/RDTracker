@@ -1,5 +1,5 @@
-# RDTracker
-[RDTracker](https://github.com/smoorke/RDTracker/releases/download/RDTracker/RDTracker.exe) for Astonia3
+# [RDTracker](https://github.com/smoorke/RDTracker/releases/download/RDTracker/RDTracker.exe)
+[Download RDTracker](https://github.com/smoorke/RDTracker/releases/download/RDTracker/RDTracker.exe) for Astonia3
 
 SDL clients should always work out of the box.
 
